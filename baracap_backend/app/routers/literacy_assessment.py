@@ -10,6 +10,7 @@ from starlette.concurrency import run_in_threadpool
 from app.config import settings
 from app.services.pdf_guides import build_guide_pdf
 from app.services.literacy_assessment import (
+    answer_breakdown,
     guide_type_for_score,
     level_for_score,
     normalize_language,
@@ -47,6 +48,16 @@ class LiteracySubmission(BaseModel):
         return normalize_language(value)
 
 
+class QuestionBreakdown(BaseModel):
+    question_id: str
+    question: str
+    selected_answer: str
+    correct_answer: str
+    is_correct: bool
+    earned_points: int
+    max_points: int
+
+
 class LiteracyResult(BaseModel):
     score: int
     level: str
@@ -54,6 +65,7 @@ class LiteracyResult(BaseModel):
     guide_url: str | None = None
     telegram_sent: bool
     telegram_configured: bool
+    breakdown: list[QuestionBreakdown]
 
 
 @router.get("/questions")
@@ -86,6 +98,7 @@ async def submit_literacy_assessment(payload: LiteracySubmission) -> LiteracyRes
         guide_url=guide_url,
         telegram_sent=telegram_sent,
         telegram_configured=telegram_configured,
+        breakdown=answer_breakdown(payload.answers, payload.language),
     )
 
 

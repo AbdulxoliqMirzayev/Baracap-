@@ -46,6 +46,12 @@
       telegramNotReady: "Telegram bot token va chat id .env ichida sozlanganda ma'lumot avtomatik yuboriladi.",
       downloadGuide: "Sovg'ani qo'lga kiriting",
       giftInfo: "Bizning sovg'amizda sizga kerakli moliyaviy savodxonlik uchun kerak bo'lgan kichik qo'llanma bor.",
+      answerReview: "Savollar bo'yicha natija",
+      yourAnswer: "Sizning javobingiz",
+      correctAnswer: "To'g'ri javob",
+      points: "Ball",
+      correct: "To'g'ri",
+      incorrect: "Noto'g'ri",
       newTest: "Yangi test",
     },
     ru: {
@@ -88,6 +94,12 @@
       telegramNotReady: "После настройки Telegram bot token и chat id в .env данные будут отправляться автоматически.",
       downloadGuide: "Получить подарок",
       giftInfo: "В нашем подарке есть небольшое руководство, которое поможет улучшить вашу финансовую грамотность.",
+      answerReview: "Результат по вопросам",
+      yourAnswer: "Ваш ответ",
+      correctAnswer: "Правильный ответ",
+      points: "Баллы",
+      correct: "Верно",
+      incorrect: "Неверно",
       newTest: "Новый тест",
     },
   };
@@ -337,6 +349,7 @@
           ${result.guide_url ? `<a class="primary" href="${escapeHtml(result.guide_url)}" download data-action="gift-download">${escapeHtml(c.downloadGuide)}</a>` : `<span class="muted">${escapeHtml(c.resultLead)}</span>`}
           <p id="giftInfo" class="gift-note" hidden>${escapeHtml(c.giftInfo)}</p>
         </div>
+        ${answerReviewMarkup(result.breakdown || [])}
         <div class="button-row" style="justify-content:center">
           <a class="ghost channel-link" href="${TELEGRAM_CHANNEL_URL}" target="_blank" rel="noopener noreferrer">${escapeHtml(channelText())}</a>
           <button class="ghost" type="button" data-action="restart">${escapeHtml(c.newTest)}</button>
@@ -344,6 +357,34 @@
       </section>
     `;
     launchCelebration();
+  }
+
+  function answerReviewMarkup(items) {
+    const c = copy();
+    if (!items.length) return "";
+    return `
+      <section class="answer-review">
+        <div class="review-head">
+          <span class="pill">${escapeHtml(c.answerReview)}</span>
+        </div>
+        <div class="review-list">
+          ${items.map((item, index) => `
+            <article class="review-card ${item.is_correct ? "is-correct" : "is-incorrect"}" style="--i:${index}">
+              <div class="review-card-top">
+                <span class="review-index">${index + 1}</span>
+                <strong>${escapeHtml(item.is_correct ? c.correct : c.incorrect)}</strong>
+                <b>${escapeHtml(item.earned_points)}/${escapeHtml(item.max_points)} ${escapeHtml(c.points)}</b>
+              </div>
+              <h3>${escapeHtml(item.question)}</h3>
+              <div class="review-answers">
+                <p><span>${escapeHtml(c.yourAnswer)}</span>${escapeHtml(item.selected_answer)}</p>
+                <p><span>${escapeHtml(c.correctAnswer)}</span>${escapeHtml(item.correct_answer)}</p>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+    `;
   }
 
   document.addEventListener("pointerdown", (event) => {

@@ -122,6 +122,33 @@ def score_answers(answers: dict[str, str]) -> int:
     return score
 
 
+def answer_breakdown(answers: dict[str, str], language: str = "uz") -> list[dict[str, object]]:
+    language = normalize_language(language)
+    missing_label = "Не выбран" if language == "ru" else "Tanlanmagan"
+    result: list[dict[str, object]] = []
+    for question in QUESTIONS:
+        selected = answers.get(question.id)
+        correct_option = next(option for option in question.options if option.correct)
+        selected_option = next((option for option in question.options if option.id == selected), None)
+        is_correct = selected_option is not None and selected_option.id == correct_option.id
+        result.append(
+            {
+                "question_id": question.id,
+                "question": question.text_ru if language == "ru" else question.text_uz,
+                "selected_answer": (
+                    selected_option.text_ru if language == "ru" else selected_option.text_uz
+                )
+                if selected_option
+                else missing_label,
+                "correct_answer": correct_option.text_ru if language == "ru" else correct_option.text_uz,
+                "is_correct": is_correct,
+                "earned_points": question.weight if is_correct else 0,
+                "max_points": question.weight,
+            }
+        )
+    return result
+
+
 def level_for_score(score: int, language: str = "uz") -> str:
     language = normalize_language(language)
     if score >= 80:
