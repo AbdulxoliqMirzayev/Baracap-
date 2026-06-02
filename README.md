@@ -27,9 +27,23 @@ Railway provides `PORT` automatically. Do not set `APP_HOST=127.0.0.1` in Railwa
 
 ## Run
 
+Windowsda eng oson yo'l:
+
+```bat
+start_baracap.bat
+```
+
+Brauzerda oching:
+
+```text
+http://127.0.0.1:8000
+```
+
+Agar `python` va `pip` PATH ichida ishlamasa, explicit Python 3.12 yo'lidan foydalaning:
+
 ```bash
-pip install -r requirements.txt
-python main.py
+"%LocalAppData%\Programs\Python\Python312\python.exe" -m pip install -r requirements.txt
+"%LocalAppData%\Programs\Python\Python312\python.exe" main.py
 ```
 
 Open the URL printed in the terminal, usually `http://127.0.0.1:8000`.
