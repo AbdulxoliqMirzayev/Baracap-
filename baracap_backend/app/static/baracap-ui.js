@@ -11,7 +11,7 @@
       headerBadge: "6 savol / 100 ball",
       giftPill: "Sovg'ali test",
       heroTitle: "Savollarga javob bering va sovg'amizni qo'lga kiriting",
-      heroLead: "6 ta professional moliyaviy savodxonlik savoliga javob bering. Natija yakunda 100 ballik tizimda hisoblanadi va darajangizga mos PDF qo'llanma beriladi.",
+      heroLead: "6 ta professional moliyaviy savodxonlik savoliga javob bering. Natija yakunda 100 ballik tizimda hisoblanadi va darajangizga mos sovg'a beriladi.",
       firstName: "Ism",
       lastName: "Familiya",
       phone: "Telefon raqami",
@@ -27,7 +27,7 @@
       start: "Testni boshlash",
       visualTitle: "Moliyaviy darajangizni aniqlang",
       visualLead: "Birinchi 3 savol asosiy tushunchalarni, keyingi 3 savol esa professional moliyaviy qarorlarni tekshiradi.",
-      steps: ["Ma'lumotlaringizni kiriting", "6 ta savolga javob bering", "Darajangiz va PDF sovg'ani oling"],
+      steps: ["Ma'lumotlaringizni kiriting", "6 ta savolga javob bering", "Sovg'ani qo'lga kiriting"],
       quizTitle: "Moliyaviy savodxonlik testi",
       quizLead: "Savollarga diqqat bilan javob bering. Ballar faqat yakuniy natijada ko'rsatiladi.",
       answerCount: "javob",
@@ -38,13 +38,13 @@
       requestFailed: "So'rov bajarilmadi",
       result: "Natija",
       congrats: "Tabriklaymiz, sovg'ani qo'lga kiritdingiz",
-      resultLead: "Ballingizga mos PDF sovg'a tayyor. Tugmani bosing va qo'llanmani yuklab oling.",
-      professionalGuide: "Professional moliyaviy qo'llanma",
-      simpleGuide: "Sodda va tushunarli moliyaviy qo'llanma",
+      resultLead: "Ballingizga mos sovg'a tayyor. Tugmani bosing va sovg'ani qo'lga kiriting.",
+      professionalGuide: "Sovg'ani qo'lga kiriting",
+      simpleGuide: "Sovg'ani qo'lga kiriting",
       telegramSent: "Ma'lumotlaringiz Telegram botga yuborildi.",
       telegramFailed: "Telegramga yuborishda xatolik bo'ldi, lekin natijangiz hisoblandi.",
       telegramNotReady: "Telegram bot token va chat id .env ichida sozlanganda ma'lumot avtomatik yuboriladi.",
-      downloadGuide: "Sovg'ani olish",
+      downloadGuide: "Sovg'ani qo'lga kiriting",
       giftInfo: "Bizning sovg'amizda sizga kerakli moliyaviy savodxonlik uchun kerak bo'lgan kichik qo'llanma bor.",
       newTest: "Yangi test",
     },
@@ -53,7 +53,7 @@
       headerBadge: "6 вопросов / 100 баллов",
       giftPill: "Тест с подарком",
       heroTitle: "Ответьте на вопросы и получите наш подарок",
-      heroLead: "Ответьте на 6 профессиональных вопросов по финансовой грамотности. Итог считается по 100-балльной системе, а PDF-руководство подбирается по вашему уровню.",
+      heroLead: "Ответьте на 6 профессиональных вопросов по финансовой грамотности. Итог считается по 100-балльной системе, а подарок подбирается по вашему уровню.",
       firstName: "Имя",
       lastName: "Фамилия",
       phone: "Номер телефона",
@@ -69,7 +69,7 @@
       start: "Начать тест",
       visualTitle: "Определите свой финансовый уровень",
       visualLead: "Первые 3 вопроса проверяют базовые понятия, следующие 3 - профессиональные финансовые решения.",
-      steps: ["Введите свои данные", "Ответьте на 6 вопросов", "Получите уровень и PDF-подарок"],
+      steps: ["Введите свои данные", "Ответьте на 6 вопросов", "Получите подарок"],
       quizTitle: "Тест финансовой грамотности",
       quizLead: "Отвечайте внимательно. Баллы показываются только в итоговом результате.",
       answerCount: "ответов",
@@ -80,9 +80,9 @@
       requestFailed: "Запрос не выполнен",
       result: "Результат",
       congrats: "Поздравляем, вы получили подарок",
-      resultLead: "PDF-подарок подобран по вашему уровню. Нажмите кнопку, чтобы скачать руководство.",
-      professionalGuide: "Профессиональное финансовое руководство",
-      simpleGuide: "Простое и понятное финансовое руководство",
+      resultLead: "Подарок подобран по вашему уровню. Нажмите кнопку, чтобы получить подарок.",
+      professionalGuide: "Получите подарок",
+      simpleGuide: "Получите подарок",
       telegramSent: "Ваши данные отправлены в Telegram-бот.",
       telegramFailed: "Не удалось отправить в Telegram, но результат рассчитан.",
       telegramNotReady: "После настройки Telegram bot token и chat id в .env данные будут отправляться автоматически.",
@@ -160,7 +160,7 @@
     return `
       <div class="gift-sticker" aria-hidden="true">
         <div class="gift-icon"><span></span></div>
-        <strong>PDF</strong>
+        <strong>${lang() === "ru" ? "Подарок" : "Sovg'a"}</strong>
       </div>
     `;
   }
@@ -168,12 +168,11 @@
   function scoreDiagram() {
     return `
       <div class="diagram" aria-hidden="true">
-        <span class="diagram-line line-one"></span>
-        <span class="diagram-line line-two"></span>
-        <span class="diagram-node node-one"></span>
-        <span class="diagram-node node-two"></span>
-        <span class="diagram-node node-three"></span>
         <div class="score-ring"><span>100</span><small>${lang() === "ru" ? "балл" : "ball"}</small></div>
+        <div class="diagram-caption">
+          <b>6</b>
+          <span>${lang() === "ru" ? "вопросов" : "savol"}</span>
+        </div>
       </div>
     `;
   }
@@ -325,10 +324,6 @@
 
   function renderResult(result) {
     const c = copy();
-    const guideTitle = result.guide_type === "professional"
-      ? c.professionalGuide
-      : c.simpleGuide;
-
     app.innerHTML = `
       <section class="result-card">
         <span class="pill" style="margin:0 auto">${escapeHtml(c.result)}</span>
@@ -338,7 +333,7 @@
         <p class="level-label">${escapeHtml(result.level)}</p>
         <p class="muted">${escapeHtml(c.resultLead)}</p>
         <div class="gift-box">
-          <strong>${escapeHtml(guideTitle)}</strong>
+          <strong>${escapeHtml(c.downloadGuide)}</strong>
           ${result.guide_url ? `<a class="primary" href="${escapeHtml(result.guide_url)}" download data-action="gift-download">${escapeHtml(c.downloadGuide)}</a>` : `<span class="muted">${escapeHtml(c.resultLead)}</span>`}
           <p id="giftInfo" class="gift-note" hidden>${escapeHtml(c.giftInfo)}</p>
         </div>
