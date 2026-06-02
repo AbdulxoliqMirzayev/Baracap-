@@ -1,0 +1,2 @@
+"""BARACAP backend application package."""
+

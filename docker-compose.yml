@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: baracap_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - baracap_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d baracap_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: baracap_backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/baracap_db
+      JWT_SECRET: baracap_local_docker_secret_change_for_prod
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 10080
+      GOOGLE_CLIENT_ID: ""
+      TELEGRAM_BOT_TOKEN: ""
+      TELEGRAM_CHAT_ID: ""
+      SIMPLE_GUIDE_URL: ""
+      PROFESSIONAL_GUIDE_URL: ""
+      APP_HOST: 0.0.0.0
+      FRONTEND_URL: http://localhost:8000
+      AUTO_CREATE_TABLES: "true"
+      DEV_AUTH_ENABLED: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  baracap_pgdata:

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="BARACAP moliyaviy savodxonlik testi. 6 ta savolga javob bering va sovg'ani qo'lga kiriting." />
+  <meta name="theme-color" content="#0c1110" />
+  <title>BARACAP - Moliyaviy savodxonlik testi</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c7ef61'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='800' font-size='20' text-anchor='middle' fill='%23111a00'%3EB%3C/text%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/baracap-ui.css?v=20260602a" />
+</head>
+<body>
+  <main class="assessment-shell">
+    <header class="brandbar">
+      <a class="brand" href="/" aria-label="BARACAP">
+        <span class="brand-mark">B</span>
+        <span>
+          <strong>BARACAP</strong>
+          <small id="brandSubtitle">Moliyaviy savodxonlik testi</small>
+        </span>
+      </a>
+      <div class="brand-actions">
+        <button class="ghost small" type="button" data-action="language" aria-label="Tilni almashtirish">UZ</button>
+        <span id="headerBadge" class="badge">6 savol / 100 ball</span>
+      </div>
+    </header>
+
+    <section id="app" class="assessment-view" aria-live="polite"></section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <noscript>
+    <div style="display:grid;place-items:center;min-height:100vh;font-family:sans-serif;color:#edf2ec;background:#0c1110;padding:24px;text-align:center">
+      <div>
+        <h1>BARACAP</h1>
+        <p>Testni ishlatish uchun JavaScript yoqilgan bo'lishi kerak.</p>
+      </div>
+    </div>
+  </noscript>
+
+  <script src="/baracap-ui.js?v=20260602a"></script>
+</body>
+</html>
