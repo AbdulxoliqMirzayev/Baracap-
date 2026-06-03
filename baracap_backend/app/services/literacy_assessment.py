@@ -122,6 +122,29 @@ def score_answers(answers: dict[str, str]) -> int:
     return score
 
 
+def validate_answer_payload(answers: dict[str, str]) -> None:
+    expected_question_ids = {question.id for question in QUESTIONS}
+    received_question_ids = set(answers)
+    missing = sorted(expected_question_ids - received_question_ids)
+    unknown = sorted(received_question_ids - expected_question_ids)
+    if missing:
+        raise ValueError(f"Missing answers: {', '.join(missing)}")
+    if unknown:
+        raise ValueError(f"Unknown questions: {', '.join(unknown)}")
+
+    option_ids_by_question = {
+        question.id: {option.id for option in question.options}
+        for question in QUESTIONS
+    }
+    invalid = [
+        question_id
+        for question_id, option_id in answers.items()
+        if option_id not in option_ids_by_question[question_id]
+    ]
+    if invalid:
+        raise ValueError(f"Invalid answers: {', '.join(sorted(invalid))}")
+
+
 def answer_breakdown(answers: dict[str, str], language: str = "uz") -> list[dict[str, object]]:
     language = normalize_language(language)
     missing_label = "Не выбран" if language == "ru" else "Tanlanmagan"

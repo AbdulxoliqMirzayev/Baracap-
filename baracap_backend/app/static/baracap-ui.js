@@ -1,6 +1,7 @@
 (function () {
   const API = "/api";
   const LANG_KEY = "baracap_literacy_language";
+  const RESULT_KEY = "baracap_literacy_result";
   const TELEGRAM_CHANNEL_URL = "https://t.me/BeTraderuzb";
   const app = document.getElementById("app");
   const toastEl = document.getElementById("toast");
@@ -118,6 +119,14 @@
     return COPY[lang()] || COPY.uz;
   }
 
+  function savedResult() {
+    try {
+      return JSON.parse(localStorage.getItem(RESULT_KEY) || "null");
+    } catch {
+      return null;
+    }
+  }
+
   function setLanguage(next) {
     localStorage.setItem(LANG_KEY, next === "ru" ? "ru" : "uz");
     document.documentElement.lang = lang();
@@ -211,6 +220,12 @@
   }
 
   function renderIntro() {
+    const previousResult = savedResult();
+    if (previousResult) {
+      renderResult(previousResult, false);
+      return;
+    }
+
     const c = copy();
     app.innerHTML = `
       <div class="page">
@@ -264,6 +279,11 @@
   }
 
   async function startQuiz(form) {
+    if (savedResult()) {
+      renderResult(savedResult(), false);
+      return;
+    }
+
     state.participant = Object.fromEntries(new FormData(form).entries());
     const data = await api(`/literacy-assessment/questions?language=${lang()}`);
     state.questions = data.questions;
@@ -317,6 +337,11 @@
   }
 
   async function submitQuiz(form) {
+    if (savedResult()) {
+      renderResult(savedResult(), false);
+      return;
+    }
+
     const formData = new FormData(form);
     state.answers = Object.fromEntries(formData.entries());
     if (Object.keys(state.answers).length !== state.questions.length) {
@@ -331,10 +356,11 @@
         language: lang(),
       }),
     });
+    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
     renderResult(result);
   }
 
-  function renderResult(result) {
+  function renderResult(result, celebrate = true) {
     const c = copy();
     app.innerHTML = `
       <section class="result-card">
@@ -352,11 +378,10 @@
         ${answerReviewMarkup(result.breakdown || [])}
         <div class="button-row" style="justify-content:center">
           <a class="ghost channel-link" href="${TELEGRAM_CHANNEL_URL}" target="_blank" rel="noopener noreferrer">${escapeHtml(channelText())}</a>
-          <button class="ghost" type="button" data-action="restart">${escapeHtml(c.newTest)}</button>
         </div>
       </section>
     `;
-    launchCelebration();
+    if (celebrate) launchCelebration();
   }
 
   function answerReviewMarkup(items) {
@@ -421,7 +446,9 @@
       state.participant = null;
       state.questions = [];
       state.answers = {};
-      renderIntro();
+      const previousResult = savedResult();
+      if (previousResult) renderResult(previousResult, false);
+      else renderIntro();
     }
     if (action === "gift-download") {
       const giftInfo = document.getElementById("giftInfo");

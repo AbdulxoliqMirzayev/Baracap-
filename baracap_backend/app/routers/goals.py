@@ -122,7 +122,8 @@ async def update_goal(
                 detail=f"{key} cannot be null",
             )
 
-    if values.get("status") == "active":
+    requested_status = values.get("status")
+    if requested_status is not None and requested_status.value == "active":
         await db.execute(
             update(Goal)
             .where(
@@ -135,6 +136,8 @@ async def update_goal(
 
     for key, value in values.items():
         if key == "currency" and value is not None:
+            value = value.value
+        if key == "status" and value is not None:
             value = value.value
         setattr(goal, key, value)
 

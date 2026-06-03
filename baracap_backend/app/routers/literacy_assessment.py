@@ -3,12 +3,12 @@ from __future__ import annotations
 from html import escape
 from typing import Literal
 
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field, field_validator
 from starlette.concurrency import run_in_threadpool
 
 from app.config import settings
-from app.services.pdf_guides import build_guide_pdf
+from app.services.pdf_guides import build_guide_pdf, guide_filename
 from app.services.literacy_assessment import (
     answer_breakdown,
     guide_type_for_score,
@@ -16,6 +16,7 @@ from app.services.literacy_assessment import (
     normalize_language,
     public_questions,
     score_answers,
+    validate_answer_payload,
 )
 from app.services.telegram import TelegramNotConfiguredError, send_telegram_message
 
@@ -75,6 +76,11 @@ async def get_questions(language: str = Query(default="uz", pattern="^(uz|ru)$")
 
 @router.post("", response_model=LiteracyResult)
 async def submit_literacy_assessment(payload: LiteracySubmission) -> LiteracyResult:
+    try:
+        validate_answer_payload(payload.answers)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
     score = score_answers(payload.answers)
     level = level_for_score(score, payload.language)
     guide_type = guide_type_for_score(score)
@@ -108,7 +114,7 @@ async def download_guide(
     language: str = Query(default="uz", pattern="^(uz|ru)$"),
 ) -> Response:
     pdf = build_guide_pdf(guide_type, normalize_language(language))
-    filename = f"baracap-{guide_type}-financial-literacy-guide.pdf"
+    filename = guide_filename(guide_type)
     return Response(
         content=pdf,
         media_type="application/pdf",

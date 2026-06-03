@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/baracap_db"
-    JWT_SECRET: str = "change_me"
+    JWT_SECRET: str = "baracap_default_secret_replace_with_env_value"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
     GOOGLE_CLIENT_ID: str = ""
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     TELEGRAM_CHAT_ID: str = ""
     SIMPLE_GUIDE_URL: str = ""
     PROFESSIONAL_GUIDE_URL: str = ""
-    FRONTEND_URL: AnyHttpUrl | str = "http://localhost:3000"
+    FRONTEND_URL: AnyHttpUrl | str = "http://127.0.0.1:8000"
     AUTO_CREATE_TABLES: bool = False
     DEV_AUTH_ENABLED: bool = False
 

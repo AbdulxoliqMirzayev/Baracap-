@@ -18,6 +18,11 @@ class LanguageEnum(str, Enum):
     en = "en"
 
 
+class GoalStatusEnum(str, Enum):
+    active = "active"
+    archived = "archived"
+
+
 NonNegativeDecimal = Annotated[Decimal, Field(ge=Decimal("0"))]
 PositiveDecimal = Annotated[Decimal, Field(gt=Decimal("0"))]
 
@@ -131,9 +136,9 @@ class GoalUpdate(APIModel):
     currency: CurrencyEnum | None = None
     target_duration_months: int | None = Field(default=None, gt=0)
     goal_note: str | None = None
-    status: str | None = Field(default=None, max_length=20)
+    status: GoalStatusEnum | None = None
 
-    @field_validator("goal_type", "custom_goal", "goal_note", "status")
+    @field_validator("goal_type", "custom_goal", "goal_note")
     @classmethod
     def clean_text(cls, value: str | None) -> str | None:
         if value is None:
@@ -230,7 +235,7 @@ class SyncPlanPayload(APIModel):
 
 class SyncProgressPayload(APIModel):
     goal_id: uuid.UUID | None = None
-    added_amount: NonNegativeDecimal
+    added_amount: PositiveDecimal
     note: str | None = None
 
     @field_validator("note")
