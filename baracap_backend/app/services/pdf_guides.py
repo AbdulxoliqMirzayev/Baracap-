@@ -12,7 +12,7 @@ GUIDE_FILES = {
     },
     "professional": {
         "path": GUIDES_DIR / "moliyaviy-tartib-qollanmasi.pdf",
-        "filename": "Moliyaviy Tartib Qollanmasi.pdf",
+        "filename": "Moliyaviy tartib qo'llanmasi.pdf",
     },
 }
 
