@@ -33,9 +33,11 @@ Copy `.env.example` to `.env` and fill Telegram/PDF values when ready:
 ```env
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+ADMIN_STATS_TOKEN=
 ```
 
 Telegram variables are optional. `TELEGRAM_CHAT_ID` is for the admin chat only. Public users stay on the web page, receive the PDF gift through the backend download endpoint, and can open the public channel at `https://t.me/BeTraderuzb`.
+Admin Telegram notifications include the latest submitted result and aggregate statistics. `ADMIN_STATS_TOKEN` protects the optional `/api/literacy-assessment/statistics?token=...` endpoint.
 
 ## Active Endpoints
 
@@ -43,6 +45,7 @@ Telegram variables are optional. `TELEGRAM_CHAT_ID` is for the admin chat only. 
 - `GET /api/config`
 - `GET /api/literacy-assessment/questions`
 - `POST /api/literacy-assessment`
+- `GET /api/literacy-assessment/statistics?token=...`
 - `GET /api/literacy-assessment/guide/{simple|professional}`
 
 The frontend is served from `/`.

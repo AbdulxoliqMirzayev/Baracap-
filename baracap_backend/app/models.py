@@ -207,3 +207,28 @@ class ProgressUpdate(Base):
 
     user: Mapped[User] = relationship(back_populates="progress_updates")
     goal: Mapped[Goal] = relationship(back_populates="progress_updates")
+
+
+class LiteracyAssessmentSubmission(Base):
+    __tablename__ = "literacy_assessment_submissions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+    first_name: Mapped[str] = mapped_column(String(80), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(80), nullable=False)
+    phone: Mapped[str] = mapped_column(String(24), index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(40), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, index=True, nullable=False)
+    level: Mapped[str] = mapped_column(String(80), nullable=False)
+    guide_type: Mapped[str] = mapped_column(String(20), nullable=False)
+    language: Mapped[str] = mapped_column(String(2), nullable=False, default="uz", server_default="uz")
+    answers: Mapped[dict[str, str]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        index=True,
+    )

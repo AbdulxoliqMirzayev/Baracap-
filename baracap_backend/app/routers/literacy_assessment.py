@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+from datetime import datetime
 from html import escape
 from typing import Literal
+from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
 from app.config import settings
+from app.database import get_db
+from app.models import LiteracyAssessmentSubmission
 from app.services.pdf_guides import build_guide_pdf, guide_filename
 from app.services.literacy_assessment import (
     answer_breakdown,
@@ -17,6 +22,10 @@ from app.services.literacy_assessment import (
     public_questions,
     score_answers,
     validate_answer_payload,
+)
+from app.services.literacy_statistics import (
+    LiteracyStatistics,
+    get_literacy_statistics,
 )
 from app.services.telegram import TelegramNotConfiguredError, send_telegram_message
 
@@ -69,13 +78,39 @@ class LiteracyResult(BaseModel):
     breakdown: list[QuestionBreakdown]
 
 
+class LiteracySubmissionOut(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: str
+    phone: str
+    status: str
+    score: int
+    level: str
+    guide_type: str
+    language: str
+    created_at: datetime
+
+
+class LiteracyStatisticsOut(BaseModel):
+    total_users: int
+    high_score_users: int
+    low_score_users: int
+    average_score: float
+    highest_score: int
+    lowest_score: int
+    recent_submissions: list[LiteracySubmissionOut]
+
+
 @router.get("/questions")
 async def get_questions(language: str = Query(default="uz", pattern="^(uz|ru)$")) -> dict[str, object]:
     return {"questions": public_questions(language)}
 
 
 @router.post("", response_model=LiteracyResult)
-async def submit_literacy_assessment(payload: LiteracySubmission) -> LiteracyResult:
+async def submit_literacy_assessment(
+    payload: LiteracySubmission,
+    db: AsyncSession = Depends(get_db),
+) -> LiteracyResult:
     try:
         validate_answer_payload(payload.answers)
     except ValueError as exc:
@@ -86,10 +121,32 @@ async def submit_literacy_assessment(payload: LiteracySubmission) -> LiteracyRes
     guide_type = guide_type_for_score(score)
     guide_url = f"/api/literacy-assessment/guide/{guide_type}?language={payload.language}"
 
+    submission = LiteracyAssessmentSubmission(
+        first_name=payload.participant.first_name,
+        last_name=payload.participant.last_name,
+        phone=payload.participant.phone,
+        status=payload.participant.status,
+        score=score,
+        level=level,
+        guide_type=guide_type,
+        language=payload.language,
+        answers=dict(payload.answers),
+    )
+    db.add(submission)
+    await db.commit()
+
+    statistics = await get_literacy_statistics(db)
     telegram_sent = False
     telegram_configured = bool(settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_CHAT_ID)
     if telegram_configured:
-        text = build_telegram_text(payload.participant, score, level, guide_type, payload.language)
+        text = build_telegram_text(
+            payload.participant,
+            score,
+            level,
+            guide_type,
+            payload.language,
+            statistics,
+        )
         try:
             telegram_sent = await run_in_threadpool(send_telegram_message, text)
         except TelegramNotConfiguredError:
@@ -106,6 +163,18 @@ async def submit_literacy_assessment(payload: LiteracySubmission) -> LiteracyRes
         telegram_configured=telegram_configured,
         breakdown=answer_breakdown(payload.answers, payload.language),
     )
+
+
+@router.get("/statistics", response_model=LiteracyStatisticsOut)
+async def get_statistics(
+    token: str = Query(default="", description="Admin statistics token"),
+    db: AsyncSession = Depends(get_db),
+) -> LiteracyStatisticsOut:
+    if not settings.ADMIN_STATS_TOKEN or token != settings.ADMIN_STATS_TOKEN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    statistics = await get_literacy_statistics(db)
+    return statistics_to_response(statistics)
 
 
 @router.get("/guide/{guide_type}", include_in_schema=False)
@@ -128,6 +197,7 @@ def build_telegram_text(
     level: str,
     guide_type: str,
     language: str,
+    statistics: LiteracyStatistics,
 ) -> str:
     is_ru = normalize_language(language) == "ru"
     guide_label = "Профессиональное руководство" if guide_type == "professional" and is_ru else (
@@ -145,6 +215,13 @@ def build_telegram_text(
         "level": "Уровень" if is_ru else "Daraja",
         "gift": "Подарок" if is_ru else "Sovg'a",
     }
+    recent_lines = [
+        f"{index}. {escape(item.first_name)} {escape(item.last_name)} - {item.score}/100"
+        for index, item in enumerate(statistics.recent_submissions[:5], start=1)
+    ]
+    if not recent_lines:
+        recent_lines = ["Hali natija yo'q"]
+
     return "\n".join(
         [
             f"<b>{labels['title']}</b>",
@@ -157,5 +234,41 @@ def build_telegram_text(
             f"{labels['score']}: <b>{score}/100</b>",
             f"{labels['level']}: <b>{escape(level)}</b>",
             f"{labels['gift']}: {escape(guide_label)}",
+            "",
+            "<b>Statistika</b>",
+            f"Jami foydalanuvchilar: <b>{statistics.total_users}</b>",
+            f"50 va undan yuqori ball: <b>{statistics.high_score_users}</b>",
+            f"50 dan past ball: <b>{statistics.low_score_users}</b>",
+            f"O'rtacha ball: <b>{statistics.average_score}/100</b>",
+            f"Eng yuqori / eng past: <b>{statistics.highest_score}/{statistics.lowest_score}</b>",
+            "",
+            "<b>Oxirgi natijalar</b>",
+            *recent_lines,
         ]
+    )
+
+
+def statistics_to_response(statistics: LiteracyStatistics) -> LiteracyStatisticsOut:
+    return LiteracyStatisticsOut(
+        total_users=statistics.total_users,
+        high_score_users=statistics.high_score_users,
+        low_score_users=statistics.low_score_users,
+        average_score=statistics.average_score,
+        highest_score=statistics.highest_score,
+        lowest_score=statistics.lowest_score,
+        recent_submissions=[
+            LiteracySubmissionOut(
+                id=item.id,
+                first_name=item.first_name,
+                last_name=item.last_name,
+                phone=item.phone,
+                status=item.status,
+                score=item.score,
+                level=item.level,
+                guide_type=item.guide_type,
+                language=item.language,
+                created_at=item.created_at,
+            )
+            for item in statistics.recent_submissions
+        ],
     )

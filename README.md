@@ -19,9 +19,16 @@ python main.py
 ```env
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_CHAT_ID=
+ADMIN_STATS_TOKEN=
 ```
 
 `TELEGRAM_CHAT_ID` should be the admin chat or private admin group. Users do not access the bot; they only use the web page. After finishing the quiz, users see a Telegram channel button that opens `https://t.me/BeTraderuzb`.
+Each admin Telegram notification includes the latest user result plus total users, 50+ score count, low-score count, average score, and recent results.
+`ADMIN_STATS_TOKEN` protects the optional JSON statistics endpoint:
+
+```text
+/api/literacy-assessment/statistics?token=your-secret
+```
 
 Railway provides `PORT` automatically. Do not set `APP_HOST=127.0.0.1` in Railway; the app defaults to `0.0.0.0` for deployment.
 
@@ -54,6 +61,7 @@ Copy `.env.example` to `.env` and fill:
 
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
+- `ADMIN_STATS_TOKEN`
 
 Telegram variables are optional. PDF gifts are generated and downloaded from the browser after the quiz result.
 

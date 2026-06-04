@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_ID: str = ""
     TELEGRAM_BOT_TOKEN: str = ""
     TELEGRAM_CHAT_ID: str = ""
+    ADMIN_STATS_TOKEN: str = ""
     SIMPLE_GUIDE_URL: str = ""
     PROFESSIONAL_GUIDE_URL: str = ""
     FRONTEND_URL: AnyHttpUrl | str = "http://127.0.0.1:8000"
