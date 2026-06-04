@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 from pydantic import AnyHttpUrl
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +26,15 @@ class Settings(BaseSettings):
         case_sensitive=True,
         extra="ignore",
     )
+
+    @field_validator("DATABASE_URL")
+    @classmethod
+    def normalize_async_database_url(cls, value: str) -> str:
+        if value.startswith("postgresql://"):
+            return value.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if value.startswith("postgres://"):
+            return value.replace("postgres://", "postgresql+asyncpg://", 1)
+        return value
 
     @property
     def cors_origins(self) -> list[str]:
