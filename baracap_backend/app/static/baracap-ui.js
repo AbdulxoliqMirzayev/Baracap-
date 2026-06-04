@@ -443,12 +443,11 @@
     }
     if (action === "language") {
       setLanguage(lang() === "uz" ? "ru" : "uz");
+      localStorage.removeItem(RESULT_KEY);
       state.participant = null;
       state.questions = [];
       state.answers = {};
-      const previousResult = savedResult();
-      if (previousResult) renderResult(previousResult, false);
-      else renderIntro();
+      renderIntro();
     }
     if (action === "gift-download") {
       const giftInfo = document.getElementById("giftInfo");
