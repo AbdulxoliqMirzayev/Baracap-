@@ -8,11 +8,11 @@ GUIDES_DIR = Path(__file__).resolve().parents[1] / "static" / "guides"
 GUIDE_FILES = {
     "simple": {
         "path": GUIDES_DIR / "moliyaviy-tartib.pdf",
-        "filename": "Moliyaviy Tartib.pdf",
+        "filename": "Moliyaviy savodxonlik bo'yicha professional qo'llanma.pdf",
     },
     "professional": {
         "path": GUIDES_DIR / "moliyaviy-tartib-qollanmasi.pdf",
-        "filename": "Moliyaviy tartib qo'llanmasi.pdf",
+        "filename": "Moliyaviy savodxonlik bo'yicha professional qo'llanma.pdf",
     },
 }
 

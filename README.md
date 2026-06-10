@@ -32,6 +32,31 @@ Each admin Telegram notification includes the latest user result plus total user
 
 Railway provides `PORT` automatically. Do not set `APP_HOST=127.0.0.1` in Railway; the app defaults to `0.0.0.0` for deployment.
 
+### Custom Domain
+
+The app is ready for a Railway public domain or your own custom domain.
+
+- If you use Railway's generated domain, no extra domain env variable is required.
+- If you connect your own domain, add one of these in Railway:
+
+```env
+CUSTOM_DOMAIN=example.com
+```
+
+or:
+
+```env
+FRONTEND_URL=https://example.com
+```
+
+Use the exact production domain, without a trailing slash. The server will normalize `example.com` to `https://example.com`, add it to CORS, and expose it through `/api/config`.
+
+If the frontend is ever served from a separate domain, add comma-separated origins:
+
+```env
+CORS_ORIGINS=https://www.example.com,https://app.example.com
+```
+
 ## Run
 
 Windowsda eng oson yo'l:

@@ -64,7 +64,7 @@ async def frontend_config() -> dict[str, str | bool]:
         "telegram_configured": bool(settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_CHAT_ID),
         "simple_guide_ready": True,
         "professional_guide_ready": True,
-        "frontend_url": str(settings.FRONTEND_URL).rstrip("/"),
+        "frontend_url": settings.public_frontend_url,
     }
 
 

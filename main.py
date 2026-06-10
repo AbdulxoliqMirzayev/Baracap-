@@ -2,12 +2,29 @@ import os
 import socket
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parent
 BACKEND_DIR = ROOT / "baracap_backend"
 STATIC_DIR = BACKEND_DIR / "app" / "static"
 DEFAULT_POSTGRES_URL = "postgresql+asyncpg://postgres:password@localhost:5432/baracap_db"
+
+
+def normalize_origin(value: str) -> str:
+    value = value.strip().rstrip("/")
+    if not value:
+        return ""
+    if value.startswith(("http://", "https://")):
+        return value
+    if value.startswith("//"):
+        return f"https:{value}"
+    return f"https://{value}"
+
+
+def is_local_origin(value: str) -> bool:
+    parsed = urlparse(value)
+    return parsed.hostname in {"127.0.0.1", "localhost", "0.0.0.0"}
 
 
 def load_env_file(path: Path) -> dict[str, str]:
@@ -53,18 +70,34 @@ def configure_environment(port: int) -> None:
     os.environ.setdefault("JWT_SECRET", "baracap_local_dev_secret_change_for_prod")
     os.environ.setdefault("JWT_ALGORITHM", "HS256")
     os.environ.setdefault("ACCESS_TOKEN_EXPIRE_MINUTES", "10080")
-    public_domain = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "").strip()
-    if public_domain and "FRONTEND_URL" not in os.environ:
-        os.environ["FRONTEND_URL"] = f"https://{public_domain}"
+    configured_frontend = normalize_origin(os.environ.get("FRONTEND_URL", ""))
+    deployment_origin = (
+        normalize_origin(os.environ.get("PUBLIC_DOMAIN", ""))
+        or normalize_origin(os.environ.get("CUSTOM_DOMAIN", ""))
+        or normalize_origin(os.environ.get("RAILWAY_PUBLIC_DOMAIN", ""))
+        or normalize_origin(os.environ.get("RAILWAY_STATIC_URL", ""))
+    )
+    local_origin = f"http://127.0.0.1:{port}"
+    if deployment_origin:
+        public_origin = deployment_origin
+    elif configured_frontend and not is_local_origin(configured_frontend):
+        public_origin = configured_frontend
     else:
-        os.environ.setdefault("FRONTEND_URL", f"http://127.0.0.1:{port}")
+        public_origin = local_origin
+
+    if deployment_origin and (not configured_frontend or is_local_origin(configured_frontend)):
+        os.environ["FRONTEND_URL"] = public_origin
+    elif configured_frontend and is_local_origin(configured_frontend):
+        os.environ["FRONTEND_URL"] = public_origin
+    else:
+        os.environ.setdefault("FRONTEND_URL", public_origin)
 
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
     (STATIC_DIR / "baracap-dev-server.js").write_text(
         "\n".join(
             [
-                f"window.BARACAP_SERVER_ORIGIN = 'http://127.0.0.1:{port}';",
-                f"window.BARACAP_API_BASE = 'http://127.0.0.1:{port}/api';",
+                f"window.BARACAP_SERVER_ORIGIN = '{public_origin}';",
+                f"window.BARACAP_API_BASE = '{public_origin}/api';",
             ]
         )
         + "\n",
@@ -89,7 +122,14 @@ def main() -> None:
 
     print(f"BARACAP running at http://127.0.0.1:{port}", flush=True)
     print(f"API docs: http://127.0.0.1:{port}/docs", flush=True)
-    uvicorn.run("app.main:app", host=host, port=port, reload=False)
+    uvicorn.run(
+        "app.main:app",
+        host=host,
+        port=port,
+        reload=False,
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from html import escape
 from typing import Literal
+from urllib.parse import quote
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
@@ -184,10 +185,15 @@ async def download_guide(
 ) -> Response:
     pdf = build_guide_pdf(guide_type, normalize_language(language))
     filename = guide_filename(guide_type)
+    encoded_filename = quote(filename)
     return Response(
         content=pdf,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="{filename}"; filename*=UTF-8\'\'{encoded_filename}'
+            )
+        },
     )
 
 

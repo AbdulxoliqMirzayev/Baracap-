@@ -111,8 +111,33 @@
     answers: {},
   };
 
+  function storageGet(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  function storageSet(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function storageRemove(key) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // Ignore blocked storage; the in-memory state will still update.
+    }
+  }
+
   function lang() {
-    return localStorage.getItem(LANG_KEY) === "ru" ? "ru" : "uz";
+    return storageGet(LANG_KEY) === "ru" ? "ru" : "uz";
   }
 
   function copy() {
@@ -121,14 +146,18 @@
 
   function savedResult() {
     try {
-      return JSON.parse(localStorage.getItem(RESULT_KEY) || "null");
+      const result = JSON.parse(storageGet(RESULT_KEY) || "null");
+      if (!result || typeof result !== "object") return null;
+      if (!Number.isFinite(Number(result.score)) || !result.level) return null;
+      return result;
     } catch {
+      storageRemove(RESULT_KEY);
       return null;
     }
   }
 
   function setLanguage(next) {
-    localStorage.setItem(LANG_KEY, next === "ru" ? "ru" : "uz");
+    storageSet(LANG_KEY, next === "ru" ? "ru" : "uz");
     document.documentElement.lang = lang();
     syncChrome();
   }
@@ -152,6 +181,7 @@
   }
 
   function toast(message, error = false) {
+    if (!toastEl) return;
     toastEl.textContent = message;
     toastEl.classList.toggle("error", error);
     toastEl.classList.add("show");
@@ -168,9 +198,19 @@
     const headers = new Headers(options.headers || {});
     headers.set("Accept", "application/json");
     if (options.body) headers.set("Content-Type", "application/json");
-    const response = await fetch(`${API}${path}`, { ...options, headers });
+    let response;
+    try {
+      response = await fetch(`${API}${path}`, { ...options, headers });
+    } catch {
+      throw new Error(copy().requestFailed);
+    }
     const text = await response.text();
-    const data = text ? JSON.parse(text) : null;
+    let data = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
     if (!response.ok) {
       throw new Error(data?.detail || copy().requestFailed);
     }
@@ -248,7 +288,7 @@
               </div>
               <div class="field">
                 <label>${escapeHtml(c.phone)}</label>
-                <input name="phone" autocomplete="tel" required minlength="7" placeholder="+998 90 123 45 67">
+                <input name="phone" type="tel" inputmode="tel" autocomplete="tel" required minlength="7" placeholder="+998 90 123 45 67">
               </div>
               <div class="field">
                 <label>${escapeHtml(c.status)}</label>
@@ -286,6 +326,9 @@
 
     state.participant = Object.fromEntries(new FormData(form).entries());
     const data = await api(`/literacy-assessment/questions?language=${lang()}`);
+    if (!Array.isArray(data?.questions) || !data.questions.length) {
+      throw new Error(copy().requestFailed);
+    }
     state.questions = data.questions;
     state.answers = {};
     renderQuiz();
@@ -356,19 +399,21 @@
         language: lang(),
       }),
     });
-    localStorage.setItem(RESULT_KEY, JSON.stringify(result));
+    storageSet(RESULT_KEY, JSON.stringify(result));
     renderResult(result);
   }
 
   function renderResult(result, celebrate = true) {
     const c = copy();
+    const score = Number.isFinite(Number(result?.score)) ? Number(result.score) : 0;
+    const level = result?.level || "";
     app.innerHTML = `
       <section class="result-card">
         <span class="pill" style="margin:0 auto">${escapeHtml(c.result)}</span>
         ${giftSticker()}
-        <div class="result-score">${result.score}/100</div>
+        <div class="result-score">${score}/100</div>
         <h2>${escapeHtml(c.congrats)}</h2>
-        <p class="level-label">${escapeHtml(result.level)}</p>
+        <p class="level-label">${escapeHtml(level)}</p>
         <p class="muted">${escapeHtml(c.resultLead)}</p>
         <div class="gift-box">
           <strong>${escapeHtml(c.downloadGuide)}</strong>
@@ -443,7 +488,7 @@
     }
     if (action === "language") {
       setLanguage(lang() === "uz" ? "ru" : "uz");
-      localStorage.removeItem(RESULT_KEY);
+      storageRemove(RESULT_KEY);
       state.participant = null;
       state.questions = [];
       state.answers = {};

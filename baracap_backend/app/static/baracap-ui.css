@@ -17,11 +17,14 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--text);
   background:
     radial-gradient(circle at 10% 8%, rgba(125, 217, 209, 0.16), transparent 30%),
@@ -46,14 +49,14 @@ body::before {
 
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; }
-button { border: 0; cursor: pointer; }
+button { border: 0; cursor: pointer; touch-action: manipulation; }
 button:disabled { cursor: wait; opacity: .68; }
 
 .assessment-shell {
   position: relative;
   width: min(1200px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 18px 0 64px;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
 }
 
 .brandbar {
@@ -176,7 +179,7 @@ button:disabled { cursor: wait; opacity: .68; }
 .hero h1 {
   max-width: 800px;
   margin: 18px 0 16px;
-  font: 800 clamp(38px, 6vw, 68px)/1.02 Manrope, sans-serif;
+  font: 800 64px/1.02 Manrope, sans-serif;
   letter-spacing: 0;
 }
 
@@ -376,6 +379,7 @@ button:disabled { cursor: wait; opacity: .68; }
   outline: none;
   background: rgba(8, 11, 11, .76);
   color: var(--text);
+  font-size: 16px;
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
 }
 
@@ -491,7 +495,7 @@ button:disabled { cursor: wait; opacity: .68; }
 
 .quiz-title {
   margin: 16px 0 12px;
-  font: 800 clamp(32px,5vw,56px)/1.05 Manrope, sans-serif;
+  font: 800 52px/1.05 Manrope, sans-serif;
 }
 
 .gift-sticker {
@@ -585,6 +589,7 @@ button:disabled { cursor: wait; opacity: .68; }
   border-radius: 16px;
   background: rgba(255,255,255,.035);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition: border-color .15s ease, background .15s ease, transform .15s ease;
 }
 
@@ -616,7 +621,7 @@ button:disabled { cursor: wait; opacity: .68; }
 
 .result-score {
   color: var(--lime);
-  font: 800 clamp(54px, 12vw, 110px)/.92 Manrope, sans-serif;
+  font: 800 96px/.92 Manrope, sans-serif;
 }
 
 .result-card h2 {
@@ -970,6 +975,9 @@ button:disabled { cursor: wait; opacity: .68; }
 }
 
 @media (max-width: 900px) {
+  .assessment-shell {
+    width: min(100vw - 28px, 820px);
+  }
   .hero,
   .form-grid {
     grid-template-columns: 1fr;
@@ -983,20 +991,31 @@ button:disabled { cursor: wait; opacity: .68; }
   .diagram {
     width: min(230px, 82vw);
   }
+  .hero h1 {
+    font-size: 48px;
+  }
+  .quiz-title {
+    font-size: 42px;
+  }
+  .result-score {
+    font-size: 78px;
+  }
 }
 
 @media (max-width: 560px) {
   .assessment-shell {
-    width: min(100vw - 22px, 1180px);
-    padding-top: 14px;
+    width: min(100vw - 20px, 1180px);
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
   }
   .brandbar {
     align-items: center;
     flex-direction: row;
     gap: 10px;
+    margin-bottom: 18px;
   }
   .brand {
     min-width: 0;
+    gap: 10px;
   }
   .brand-mark {
     width: 42px;
@@ -1005,6 +1024,12 @@ button:disabled { cursor: wait; opacity: .68; }
   }
   .brand strong {
     font-size: 19px;
+  }
+  .brand small {
+    max-width: 168px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .brand-actions {
     width: auto;
@@ -1015,7 +1040,7 @@ button:disabled { cursor: wait; opacity: .68; }
     display: none;
   }
   .panel {
-    padding: 20px;
+    padding: 18px;
     border-radius: 18px;
   }
   .hero-panel::after {
@@ -1024,14 +1049,19 @@ button:disabled { cursor: wait; opacity: .68; }
   }
   .hero h1 {
     margin-top: 16px;
-    font-size: 34px;
+    font-size: 32px;
     overflow-wrap: anywhere;
   }
   .lead {
     font-size: 16px;
+    line-height: 1.55;
   }
   .hero-top {
     align-items: center;
+    gap: 10px;
+  }
+  .hero-top .pill {
+    max-width: 160px;
   }
   .gift-sticker {
     width: 86px;
@@ -1056,11 +1086,12 @@ button:disabled { cursor: wait; opacity: .68; }
     height: 15px;
   }
   .info-visual {
-    padding: 20px;
+    padding: 18px;
     border-radius: 18px;
+    gap: 18px;
   }
   .info-visual h2 {
-    font-size: 25px;
+    font-size: 24px;
   }
   .score-ring {
     width: 150px;
@@ -1085,7 +1116,7 @@ button:disabled { cursor: wait; opacity: .68; }
     height: 34px;
   }
   .question-card {
-    padding: 18px;
+    padding: 16px;
     border-radius: 18px;
   }
   .question-card h3 {
@@ -1093,6 +1124,8 @@ button:disabled { cursor: wait; opacity: .68; }
   }
   .option {
     align-items: flex-start;
+    min-height: 58px;
+    padding: 14px;
   }
   .button-row {
     display: grid;
@@ -1106,11 +1139,11 @@ button:disabled { cursor: wait; opacity: .68; }
     text-align: center;
   }
   .result-card {
-    padding: 20px;
+    padding: 18px;
     border-radius: 18px;
   }
   .result-card h2 {
-    font-size: 27px;
+    font-size: 25px;
   }
   .result-score {
     font-size: 62px;
@@ -1132,6 +1165,105 @@ button:disabled { cursor: wait; opacity: .68; }
   }
   .review-answers p {
     min-height: auto;
+  }
+  .toast {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: min(100vw - 20px, 560px);
+  }
+}
+
+@media (max-width: 420px) {
+  .assessment-shell {
+    width: min(100vw - 16px, 1180px);
+  }
+  .brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+  .brand strong {
+    font-size: 17px;
+  }
+  .brand small {
+    max-width: 128px;
+    font-size: 11px;
+  }
+  .small {
+    min-height: 38px;
+    padding-inline: 12px;
+  }
+  .hero h1 {
+    font-size: 29px;
+  }
+  .hero-top .pill {
+    max-width: 132px;
+  }
+  .gift-sticker {
+    width: 76px;
+    height: 76px;
+    border-radius: 18px;
+  }
+  .gift-sticker strong {
+    font-size: 11px;
+  }
+  .gift-icon {
+    width: 36px;
+    height: 30px;
+  }
+  .gift-icon::before {
+    left: 15px;
+    height: 30px;
+  }
+  .gift-icon::after {
+    width: 44px;
+    top: 10px;
+  }
+  .gift-icon span::before,
+  .gift-icon span::after {
+    width: 15px;
+    height: 13px;
+  }
+  .field input,
+  .field select {
+    min-height: 52px;
+  }
+  .quiz-title {
+    font-size: 30px;
+  }
+  .question-card h3 {
+    font-size: 18px;
+  }
+  .primary,
+  .ghost {
+    min-height: 52px;
+    padding-inline: 16px;
+  }
+  .result-score {
+    font-size: 58px;
+  }
+}
+
+@media (max-width: 360px) {
+  .brand small {
+    display: none;
+  }
+  .hero h1 {
+    font-size: 27px;
+  }
+  .panel,
+  .info-visual,
+  .result-card,
+  .question-card {
+    padding: 14px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .step:hover,
+  .option:hover,
+  .primary:hover:not(:disabled),
+  .ghost:hover:not(:disabled) {
+    transform: none;
   }
 }
 
