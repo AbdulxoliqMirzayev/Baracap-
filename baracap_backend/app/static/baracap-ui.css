@@ -787,41 +787,115 @@ button:disabled { cursor: wait; opacity: .68; }
   z-index: 80;
   pointer-events: none;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(199,239,97,.12), transparent 28%),
+    radial-gradient(circle at 22% 34%, rgba(125,217,209,.1), transparent 22%),
+    radial-gradient(circle at 78% 36%, rgba(255,122,144,.1), transparent 22%);
+  animation: celebrationFade 3.5s ease-out forwards;
 }
 
 .celebration::before,
 .celebration::after {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 35%;
-  width: 220px;
-  height: 220px;
+  inset: auto auto 10% 50%;
+  width: min(860px, 94vw);
+  height: min(360px, 44vh);
   border-radius: 50%;
-  border: 2px solid rgba(199,239,97,.38);
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(.08);
-  animation: burstRing 1.2s ease-out forwards;
+  opacity: .55;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(ellipse at center, rgba(199,239,97,.2), transparent 64%),
+    linear-gradient(90deg, transparent, rgba(237,242,236,.18), transparent);
+  filter: blur(18px);
+  animation: celebrationGlow 2.8s ease-out forwards;
 }
 
 .celebration::after {
-  left: 62%;
-  top: 48%;
-  border-color: rgba(125,217,209,.32);
-  animation-delay: .16s;
+  inset: 6% auto auto 50%;
+  width: min(980px, 100vw);
+  height: min(420px, 52vh);
+  opacity: .34;
+  background:
+    radial-gradient(ellipse at center, rgba(125,217,209,.18), transparent 62%),
+    radial-gradient(ellipse at 38% 52%, rgba(255,122,144,.18), transparent 44%);
+  animation-delay: .18s;
 }
 
-.celebration span {
+.celebration-rocket {
+  position: absolute;
+  left: var(--left);
+  top: 100%;
+  width: 4px;
+  height: 70px;
+  border-radius: 999px;
+  opacity: 0;
+  transform: translate(-50%, 0);
+  background: linear-gradient(to top, transparent, var(--color), #fff);
+  box-shadow: 0 0 18px var(--color), 0 0 32px rgba(255,255,255,.32);
+  animation: rocketLaunch .72s cubic-bezier(.18,.88,.3,1) var(--delay) forwards;
+}
+
+.celebration-burst {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.24);
+  border: 1px solid rgba(237,242,236,.28);
+  box-shadow: 0 0 40px var(--color);
+  animation: burstFlash 1.55s ease-out var(--delay) forwards;
+}
+
+.celebration-burst::before,
+.celebration-burst::after {
+  content: "";
+  position: absolute;
+  inset: 48%;
+  border-radius: 999px;
+  background: var(--color);
+  box-shadow:
+    0 -48px 0 -1px var(--color),
+    0 48px 0 -1px var(--color),
+    48px 0 0 -1px var(--color),
+    -48px 0 0 -1px var(--color);
+  opacity: 0;
+  animation: starPop 1.15s ease-out var(--delay) forwards;
+}
+
+.celebration-burst::after {
+  transform: rotate(45deg);
+  animation-delay: calc(var(--delay) + .04s);
+}
+
+.celebration-burst span {
   position: absolute;
   left: 50%;
-  top: 38%;
-  width: 9px;
-  height: 9px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--color);
-  box-shadow: 0 0 22px var(--color);
+  box-shadow: 0 0 18px var(--color), 0 0 34px rgba(237,242,236,.24);
   opacity: 0;
-  animation: firework 1.25s ease-out var(--delay) forwards;
+  animation: fireworkParticle 1.45s cubic-bezier(.12,.72,.22,1) var(--delay) forwards;
+}
+
+.celebration-spark {
+  position: absolute;
+  left: var(--left);
+  top: var(--top);
+  width: 5px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--color);
+  box-shadow: 0 0 16px var(--color);
+  opacity: 0;
+  transform: rotate(22deg) scale(.6);
+  animation: glitterDrop 1.7s ease-out var(--delay) forwards;
 }
 
 .toast {
@@ -949,17 +1023,103 @@ button:disabled { cursor: wait; opacity: .68; }
   }
 }
 
-@keyframes firework {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(.5);
-  }
-  12% {
+@keyframes celebrationFade {
+  0%, 82% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.12);
+  }
+}
+
+@keyframes celebrationGlow {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(.78);
+  }
+  22% {
+    opacity: .72;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1.18);
+  }
+}
+
+@keyframes rocketLaunch {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scaleY(.55);
+  }
+  18% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(var(--rise) * -1)) scaleY(.18);
+  }
+}
+
+@keyframes burstFlash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.18);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.58);
+  }
+}
+
+@keyframes starPop {
+  0% {
+    opacity: 0;
+    transform: scale(.25);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+@keyframes fireworkParticle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.65);
+  }
+  12% {
+    opacity: 1;
+  }
+  72% {
+    opacity: .94;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), calc(-50% + var(--y))) scale(.08);
+  }
+}
+
+@keyframes glitterDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px) rotate(22deg) scale(.4);
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(76px) rotate(98deg) scale(.12);
   }
 }
 

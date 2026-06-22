@@ -44,11 +44,15 @@ def load_env_file(path: Path) -> dict[str, str]:
 def find_open_port(start: int = 8000) -> int:
     port = start
     while True:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(0.2)
-            if sock.connect_ex(("127.0.0.1", port)) != 0:
-                return port
+        if is_local_port_available(port):
+            return port
         port += 1
+
+
+def is_local_port_available(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(0.2)
+        return sock.connect_ex(("127.0.0.1", port)) != 0
 
 
 def configure_environment(port: int) -> None:
@@ -111,7 +115,10 @@ def main() -> None:
         **load_env_file(ROOT / ".env"),
     }
     requested_port = int(os.environ.get("PORT") or env_values.get("PORT") or "0")
-    port = requested_port or find_open_port(8000)
+    if requested_port and is_local_port_available(requested_port):
+        port = requested_port
+    else:
+        port = find_open_port(requested_port or 8000)
     configure_environment(port)
     host = os.environ.get("HOST") or os.environ.get("APP_HOST") or "0.0.0.0"
 

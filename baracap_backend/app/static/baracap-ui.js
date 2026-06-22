@@ -243,20 +243,65 @@
   }
 
   function launchCelebration() {
-    const burst = document.createElement("div");
-    burst.className = "celebration";
-    burst.setAttribute("aria-hidden", "true");
-    const colors = ["#c7ef61", "#7dd9d1", "#f0bc62", "#edf2ec"];
-    for (let index = 0; index < 44; index += 1) {
-      const particle = document.createElement("span");
-      particle.style.setProperty("--x", `${Math.cos(index * 0.82) * (80 + (index % 9) * 11)}px`);
-      particle.style.setProperty("--y", `${Math.sin(index * 1.04) * (70 + (index % 7) * 13)}px`);
-      particle.style.setProperty("--delay", `${(index % 11) * 0.025}s`);
-      particle.style.setProperty("--color", colors[index % colors.length]);
-      burst.appendChild(particle);
+    const celebration = document.createElement("div");
+    celebration.className = "celebration";
+    celebration.setAttribute("aria-hidden", "true");
+    const colors = ["#c7ef61", "#7dd9d1", "#f0bc62", "#ff7a90", "#edf2ec", "#f7d66d"];
+    const bursts = [
+      { x: 18, y: 28, size: 92, delay: 0 },
+      { x: 50, y: 22, size: 124, delay: 0.18 },
+      { x: 80, y: 30, size: 98, delay: 0.34 },
+      { x: 32, y: 48, size: 112, delay: 0.56 },
+      { x: 68, y: 52, size: 118, delay: 0.76 },
+      { x: 52, y: 38, size: 154, delay: 1.02 },
+      { x: 22, y: 64, size: 84, delay: 1.18 },
+      { x: 78, y: 66, size: 86, delay: 1.32 },
+    ];
+
+    bursts.forEach((burstConfig, burstIndex) => {
+      const rocket = document.createElement("i");
+      rocket.className = "celebration-rocket";
+      rocket.style.setProperty("--left", `${burstConfig.x}%`);
+      rocket.style.setProperty("--top", `${burstConfig.y}%`);
+      rocket.style.setProperty("--rise", `${100 - burstConfig.y}vh`);
+      rocket.style.setProperty("--delay", `${burstConfig.delay}s`);
+      rocket.style.setProperty("--color", colors[burstIndex % colors.length]);
+      celebration.appendChild(rocket);
+
+      const burst = document.createElement("div");
+      burst.className = "celebration-burst";
+      burst.style.setProperty("--left", `${burstConfig.x}%`);
+      burst.style.setProperty("--top", `${burstConfig.y}%`);
+      burst.style.setProperty("--size", `${burstConfig.size}px`);
+      burst.style.setProperty("--delay", `${burstConfig.delay + 0.42}s`);
+      burst.style.setProperty("--color", colors[burstIndex % colors.length]);
+
+      const particleCount = burstIndex === 5 ? 34 : 24;
+      for (let index = 0; index < particleCount; index += 1) {
+        const particle = document.createElement("span");
+        const angle = (Math.PI * 2 * index) / particleCount;
+        const distance = burstConfig.size * (0.45 + (index % 5) * 0.12);
+        particle.style.setProperty("--x", `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty("--y", `${Math.sin(angle) * distance}px`);
+        particle.style.setProperty("--delay", `${burstConfig.delay + 0.42 + (index % 7) * 0.018}s`);
+        particle.style.setProperty("--color", colors[(index + burstIndex) % colors.length]);
+        burst.appendChild(particle);
+      }
+      celebration.appendChild(burst);
+    });
+
+    for (let index = 0; index < 42; index += 1) {
+      const spark = document.createElement("b");
+      spark.className = "celebration-spark";
+      spark.style.setProperty("--left", `${8 + ((index * 19) % 84)}%`);
+      spark.style.setProperty("--top", `${18 + ((index * 23) % 62)}%`);
+      spark.style.setProperty("--delay", `${0.22 + (index % 14) * 0.075}s`);
+      spark.style.setProperty("--color", colors[index % colors.length]);
+      celebration.appendChild(spark);
     }
-    document.body.appendChild(burst);
-    window.setTimeout(() => burst.remove(), 1900);
+
+    document.body.appendChild(celebration);
+    window.setTimeout(() => celebration.remove(), 3600);
   }
 
   function renderIntro() {

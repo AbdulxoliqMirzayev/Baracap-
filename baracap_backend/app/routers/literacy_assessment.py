@@ -206,9 +206,17 @@ def build_telegram_text(
     statistics: LiteracyStatistics,
 ) -> str:
     is_ru = normalize_language(language) == "ru"
-    guide_label = "Профессиональное руководство" if guide_type == "professional" and is_ru else (
-        "Простое понятное руководство" if is_ru else (
-            "Professional qo'llanma" if guide_type == "professional" else "Sodda tushunarli qo'llanma"
+    guide_label = (
+        "Профессиональное руководство"
+        if guide_type == "professional" and is_ru
+        else (
+            "Простое понятное руководство"
+            if is_ru
+            else (
+                "Professional qo'llanma"
+                if guide_type == "professional"
+                else "Sodda tushunarli qo'llanma"
+            )
         )
     )
     labels = {
@@ -220,13 +228,21 @@ def build_telegram_text(
         "score": "Балл" if is_ru else "Ball",
         "level": "Уровень" if is_ru else "Daraja",
         "gift": "Подарок" if is_ru else "Sovg'a",
+        "statistics": "Статистика" if is_ru else "Statistika",
+        "total_users": "Всего пользователей" if is_ru else "Jami foydalanuvchilar",
+        "high_score_users": "50 баллов и выше" if is_ru else "50 va undan yuqori ball",
+        "low_score_users": "Ниже 50 баллов" if is_ru else "50 dan past ball",
+        "average_score": "Средний балл" if is_ru else "O'rtacha ball",
+        "highest_lowest": "Самый высокий / самый низкий" if is_ru else "Eng yuqori / eng past",
+        "recent_results": "Последние результаты" if is_ru else "Oxirgi natijalar",
+        "no_results": "Пока нет результатов" if is_ru else "Hali natija yo'q",
     }
     recent_lines = [
         f"{index}. {escape(item.first_name)} {escape(item.last_name)} - {item.score}/100"
         for index, item in enumerate(statistics.recent_submissions[:5], start=1)
     ]
     if not recent_lines:
-        recent_lines = ["Hali natija yo'q"]
+        recent_lines = [labels["no_results"]]
 
     return "\n".join(
         [
@@ -241,14 +257,14 @@ def build_telegram_text(
             f"{labels['level']}: <b>{escape(level)}</b>",
             f"{labels['gift']}: {escape(guide_label)}",
             "",
-            "<b>Statistika</b>",
-            f"Jami foydalanuvchilar: <b>{statistics.total_users}</b>",
-            f"50 va undan yuqori ball: <b>{statistics.high_score_users}</b>",
-            f"50 dan past ball: <b>{statistics.low_score_users}</b>",
-            f"O'rtacha ball: <b>{statistics.average_score}/100</b>",
-            f"Eng yuqori / eng past: <b>{statistics.highest_score}/{statistics.lowest_score}</b>",
+            f"<b>{labels['statistics']}</b>",
+            f"{labels['total_users']}: <b>{statistics.total_users}</b>",
+            f"{labels['high_score_users']}: <b>{statistics.high_score_users}</b>",
+            f"{labels['low_score_users']}: <b>{statistics.low_score_users}</b>",
+            f"{labels['average_score']}: <b>{statistics.average_score}/100</b>",
+            f"{labels['highest_lowest']}: <b>{statistics.highest_score}/{statistics.lowest_score}</b>",
             "",
-            "<b>Oxirgi natijalar</b>",
+            f"<b>{labels['recent_results']}</b>",
             *recent_lines,
         ]
     )
