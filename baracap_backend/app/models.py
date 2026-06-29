@@ -232,3 +232,21 @@ class LiteracyAssessmentSubmission(Base):
         server_default=func.now(),
         index=True,
     )
+
+
+class PageViewCounter(Base):
+    __tablename__ = "page_view_counters"
+
+    key: Mapped[str] = mapped_column(String(80), primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )

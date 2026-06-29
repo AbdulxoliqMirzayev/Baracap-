@@ -2,9 +2,11 @@
   const API = "/api";
   const LANG_KEY = "baracap_literacy_language";
   const RESULT_KEY = "baracap_literacy_result";
+  const VIEW_SESSION_KEY = "baracap_page_view_counted";
   const TELEGRAM_CHANNEL_URL = "https://t.me/BeTraderuzb";
   const app = document.getElementById("app");
   const toastEl = document.getElementById("toast");
+  const viewCounterEl = document.getElementById("viewCounter");
 
   const COPY = {
     uz: {
@@ -54,6 +56,7 @@
       correct: "To'g'ri",
       incorrect: "Noto'g'ri",
       newTest: "Yangi test",
+      views: "ko'rish",
     },
     ru: {
       brandSubtitle: "Тест финансовой грамотности",
@@ -102,6 +105,7 @@
       correct: "Верно",
       incorrect: "Неверно",
       newTest: "Новый тест",
+      views: "просмотров",
     },
   };
 
@@ -133,6 +137,23 @@
       window.localStorage.removeItem(key);
     } catch {
       // Ignore blocked storage; the in-memory state will still update.
+    }
+  }
+
+  function sessionGet(key) {
+    try {
+      return window.sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  function sessionSet(key, value) {
+    try {
+      window.sessionStorage.setItem(key, value);
+      return true;
+    } catch {
+      return false;
     }
   }
 
@@ -170,6 +191,7 @@
     if (brandSubtitle) brandSubtitle.textContent = c.brandSubtitle;
     if (headerBadge) headerBadge.textContent = c.headerBadge;
     if (langButton) langButton.textContent = lang().toUpperCase();
+    updateViewCounterLabel();
   }
 
   function escapeHtml(value) {
@@ -215,6 +237,37 @@
       throw new Error(data?.detail || copy().requestFailed);
     }
     return data;
+  }
+
+  function formatViewCount(value) {
+    const count = Number(value);
+    if (!Number.isFinite(count) || count < 0) return "";
+    return new Intl.NumberFormat(lang() === "ru" ? "ru-RU" : "uz-UZ").format(Math.round(count));
+  }
+
+  function updateViewCounterLabel(views) {
+    if (!viewCounterEl) return;
+    const count = views ?? viewCounterEl.dataset.views;
+    const formatted = formatViewCount(count);
+    if (!formatted) {
+      viewCounterEl.hidden = true;
+      return;
+    }
+    viewCounterEl.dataset.views = String(count);
+    viewCounterEl.textContent = `${formatted} ${copy().views}`;
+    viewCounterEl.hidden = false;
+  }
+
+  async function syncPageViews() {
+    if (!viewCounterEl) return;
+    try {
+      const counted = sessionGet(VIEW_SESSION_KEY) === "1";
+      const data = await api("/views", { method: counted ? "GET" : "POST" });
+      if (!counted) sessionSet(VIEW_SESSION_KEY, "1");
+      updateViewCounterLabel(data?.views);
+    } catch {
+      viewCounterEl.hidden = true;
+    }
   }
 
   function giftSticker() {
@@ -562,4 +615,5 @@
 
   setLanguage(lang());
   renderIntro();
+  syncPageViews();
 })();

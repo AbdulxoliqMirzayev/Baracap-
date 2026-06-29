@@ -10,7 +10,7 @@ from app.config import settings
 from app.database import engine
 from app.frontend import register_frontend
 from app.models import Base
-from app.routers import literacy_assessment
+from app.routers import literacy_assessment, views
 
 
 @asynccontextmanager
@@ -69,6 +69,7 @@ async def frontend_config() -> dict[str, str | bool]:
 
 
 api_router.include_router(literacy_assessment.router)
+api_router.include_router(views.router)
 
 app.include_router(api_router)
 register_frontend(app)
