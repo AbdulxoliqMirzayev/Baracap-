@@ -22,7 +22,7 @@ def render_page() -> Response:
 def register_frontend(app: FastAPI) -> None:
     @app.get("/baracap-app.js", include_in_schema=False)
     async def frontend_script() -> Response:
-        script = (STATIC_DIR / "baracap-ui.js").read_text(encoding="utf-8")
+        script = (STATIC_DIR / "baracap-app.js").read_text(encoding="utf-8")
         return Response(content=script, media_type="application/javascript; charset=utf-8")
 
     @app.get("/baracap-ui.js", include_in_schema=False)

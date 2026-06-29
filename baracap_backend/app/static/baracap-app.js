@@ -4,7 +4,7 @@
   if (window.BARACAP_UI_LOADED) return;
   window.BARACAP_UI_LOADED = true;
   var script = document.createElement("script");
-  script.src = "/baracap-ui.js?v=20260604b";
+  script.src = "/baracap-ui.js?v=20260629a";
   script.defer = true;
   document.head.appendChild(script);
 })();
